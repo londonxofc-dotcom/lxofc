@@ -170,7 +170,10 @@ export default function GraffitiHero() {
                   <span className="gh-test-sub">OFFICIAL CHANNEL</span>
                 </div>
                 <div className="gh-test-corner">● SIGNAL TEST</div>
-                <div className="gh-test-hint">◂ ARROW KEYS TO BROWSE ▸</div>
+                <div className="gh-test-hint">
+                  <span className="gh-test-hint--desktop">◂ ARROW KEYS TO BROWSE ▸</span>
+                  <span className="gh-test-hint--mobile">TAP ARROWS BELOW TO BROWSE</span>
+                </div>
               </div>
 
               {/* CRT layer stack */}

@@ -50,20 +50,21 @@ export default function CrazyPlayer() {
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
-    const c = canvas.getContext('2d')!
+    const cvs = canvas
+    const c = cvs.getContext('2d')!
     let raf: number
 
     function draw() {
       raf = requestAnimationFrame(draw)
-      c.clearRect(0, 0, canvas.width, canvas.height)
+      c.clearRect(0, 0, cvs.width, cvs.height)
 
       if (!analyser.current || !playing) {
         // idle: flat gold line
         c.strokeStyle = 'rgba(201,162,39,0.3)'
         c.lineWidth   = 1
         c.beginPath()
-        c.moveTo(0, canvas.height / 2)
-        c.lineTo(canvas.width, canvas.height / 2)
+        c.moveTo(0, cvs.height / 2)
+        c.lineTo(cvs.width, cvs.height / 2)
         c.stroke()
         return
       }
@@ -75,9 +76,9 @@ export default function CrazyPlayer() {
       c.shadowColor = '#C9A227'
       c.shadowBlur  = 8
       c.beginPath()
-      const slW = canvas.width / td.length
+      const slW = cvs.width / td.length
       td.forEach((v, i) => {
-        const y = ((v / 128 - 1) * canvas.height * 0.42) + canvas.height / 2
+        const y = ((v / 128 - 1) * cvs.height * 0.42) + cvs.height / 2
         i === 0 ? c.moveTo(0, y) : c.lineTo(i * slW, y)
       })
       c.stroke()

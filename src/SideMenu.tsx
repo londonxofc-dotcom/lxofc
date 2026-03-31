@@ -1,10 +1,10 @@
 import { motion } from 'framer-motion'
 
 const ITEMS = [
-  { label: 'BIO',     num: '01', href: '#bio',     colorClass: 'sm-item--yellow' },
-  { label: 'MUSIC',   num: '02', href: '#music',   colorClass: 'sm-item--blue'   },
-  { label: 'BOOKING', num: '03', href: '#booking', colorClass: 'sm-item--red'    },
-  { label: 'EPK',     num: '04', href: 'epk.html', target: '_blank', colorClass: 'sm-item--grey' },
+  { label: 'BIO',     num: '01', href: '#bio',     ariaLabel: 'Bio',                              colorClass: 'sm-item--yellow' },
+  { label: 'MUSIC',   num: '02', href: '#music',   ariaLabel: 'Music',                            colorClass: 'sm-item--blue'   },
+  { label: 'BOOKING', num: '03', href: '#booking', ariaLabel: 'Booking',                          colorClass: 'sm-item--red'    },
+  { label: 'EPK',     num: '04', href: 'epk.html', ariaLabel: 'EPK – opens in new tab', target: '_blank', colorClass: 'sm-item--grey' },
 ]
 
 const ENTRANCE_DELAY = (i: number) => 0.8 + i * 0.45
@@ -24,7 +24,7 @@ export default function SideMenu({ activeChannel }: Props) {
         <div className="sm-pg-rule" />
       </div>
 
-      {ITEMS.map(({ label, num, href, target, colorClass }, i) => (
+      {ITEMS.map(({ label, num, href, target, ariaLabel, colorClass }, i) => (
         <div
           key={label}
           className={`sm-row${i === activeChannel ? ' sm-row--active' : ''}`}
@@ -39,6 +39,8 @@ export default function SideMenu({ activeChannel }: Props) {
             href={href}
             target={target}
             rel={target ? 'noopener noreferrer' : undefined}
+            aria-label={ariaLabel}
+            aria-current={i === activeChannel ? 'page' : undefined}
             className={`sm-item ${colorClass}${i === activeChannel ? ' sm-item--active' : ''}`}
             initial={{ opacity: 0, y: -28 }}
             animate={{ opacity: 1, y: 0 }}

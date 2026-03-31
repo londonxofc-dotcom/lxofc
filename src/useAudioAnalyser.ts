@@ -1,4 +1,4 @@
-import { useRef, useEffect, RefObject } from 'react'
+import { useRef, useEffect, type RefObject } from 'react'
 
 export interface AudioBands {
   bass:  number  // 0..1, kick/sub

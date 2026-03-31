@@ -1,4 +1,4 @@
-import { useRef, useMemo, useEffect, useState, RefObject } from 'react'
+import { useRef, useMemo, useEffect, useState, type RefObject } from 'react'
 import { Canvas, useFrame, useLoader } from '@react-three/fiber'
 import { TextureLoader } from 'three'
 import * as THREE from 'three'
