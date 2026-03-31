@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>THE FILES</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    :root {
+      --black:#080808; --red:#CC0000; --red-hot:#FF1A1A;
+      --newsprint:#F5E9C8; --white:#FFFFFF; --muted:rgba(245,233,200,.45);
+      --fh:'Anton',sans-serif; --fs:'Bebas Neue',sans-serif; --fb:'IBM Plex Mono',monospace;
+    }
+    html,body { width:100%; min-height:100%; background:var(--black); color:var(--newsprint);
+      font-family:var(--fb); overflow-x:hidden; }
+    body::after {
+      content:''; position:fixed; inset:0; z-index:9999; pointer-events:none;
+      background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      background-size:200px; opacity:.55;
+    }
+    .page { min-height:100vh; display:flex; flex-direction:column;
+      align-items:center; justify-content:center; padding:2.5rem 1rem 4rem;
+      animation:fadeUp .9s ease both; }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:none} }
+    .stamp { display:inline-block; font-size:.5rem; letter-spacing:.35em; text-transform:uppercase;
+      color:var(--red); border:1px solid var(--red); padding:.3rem .9rem; margin-bottom:.9rem; }
+    h1 { font-family:var(--fh); font-size:clamp(3rem,9vw,7rem); line-height:.88;
+      letter-spacing:.03em; color:var(--white); text-transform:uppercase;
+      animation:slamIn .45s cubic-bezier(.2,0,.3,1) .3s both; text-align:center; }
+    h1 em { color:var(--red); font-style:normal; }
+    @keyframes slamIn { from{opacity:0;transform:scale(1.14) translateY(-10px)} to{opacity:1;transform:none} }
+    .subtitle { font-size:.55rem; letter-spacing:.28em; text-transform:uppercase;
+      color:var(--muted); margin-top:.5rem; text-align:center; }
+
+    /* CHARACTER */
+    .char-stage { position:relative; width:260px;
+      cursor:pointer; user-select:none; margin:1.8rem 0 0;
+      filter:drop-shadow(0 8px 28px rgba(0,0,0,.8)); }
+    .char-stage svg { animation:idleBob 2.6s ease-in-out infinite; }
+    @keyframes idleBob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+    .eyelid { transform-box:fill-box; transform-origin:50% 0%;
+      animation:blink 4.5s ease-in-out infinite; }
+    @keyframes blink { 0%,87%,95%,100%{transform:scaleY(0)} 91%{transform:scaleY(1)} }
+    #jaw { transform-box:fill-box; transform-origin:50% 0%;
+      transition:transform .32s ease-out; }
+    .char-stage.open #jaw { transform:translateY(44px) rotate(20deg); }
+    .mouth-glow {
+      position:absolute; left:50%; top:61%; transform:translate(-50%,-50%);
+      width:80px; height:0;
+      background:radial-gradient(ellipse,#FF2200 0%,#990000 50%,transparent 100%);
+      border-radius:50%; filter:blur(10px); opacity:0; pointer-events:none;
+      transition:height .32s ease-out,opacity .25s ease-out; z-index:2;
+    }
+    .char-stage.open .mouth-glow { height:52px; opacity:1; }
+    .click-hint { position:absolute; bottom:-26px; left:50%; transform:translateX(-50%);
+      font-size:.48rem; letter-spacing:.3em; text-transform:uppercase;
+      color:var(--muted); white-space:nowrap; transition:opacity .3s; }
+    .char-stage.open .click-hint { opacity:0; }
+
+    /* BUTTON */
+    .open-btn { margin-top:3rem; font-family:var(--fh); font-size:1.4rem;
+      letter-spacing:.15em; color:var(--white); background:var(--red); border:none;
+      padding:.95rem 2.6rem; cursor:pointer; text-transform:uppercase;
+      transition:transform .18s,background .18s; }
+    .open-btn:hover { transform:scale(1.04); background:var(--red-hot); }
+    .open-btn:active { transform:scale(.97); }
+    .source { margin-top:.9rem; font-size:.48rem; letter-spacing:.25em;
+      text-transform:uppercase; color:rgba(245,233,200,.22); }
+    .source a { color:rgba(204,0,0,.5); text-decoration:none; }
+    .source a:hover { color:var(--red); }
+    .counter { margin-top:.6rem; font-size:.46rem; letter-spacing:.28em;
+      text-transform:uppercase; color:rgba(245,233,200,.16); }
+
+    /* CARD PORTAL — flies out of the mouth */
+    .card-portal {
+      position:fixed;
+      left:var(--mx,50vw); top:var(--my,50vh);
+      transform:translate(-50%,-50%) scale(.02) rotate(720deg);
+      opacity:0; z-index:200; pointer-events:none;
+      width:min(560px,90vw);
+    }
+    .card-portal.fly-out {
+      animation:flyOut .8s cubic-bezier(.12,0,.24,1) forwards;
+    }
+    .card-portal.landed {
+      pointer-events:all;
+      transform:translate(-50%,-50%) scale(1) rotate(0deg);
+      opacity:1;
+      left:50vw; top:50vh;
+    }
+    @keyframes flyOut {
+      0%   { opacity:0; transform:translate(-50%,-50%) scale(.02) rotate(720deg);
+             left:var(--mx,50vw); top:var(--my,50vh); }
+      30%  { opacity:1; }
+      100% { opacity:1; transform:translate(-50%,-50%) scale(1) rotate(0deg);
+             left:50vw; top:50vh; }
+    }
+    .backdrop { position:fixed; inset:0; z-index:199; background:rgba(0,0,0,.82);
+      opacity:0; pointer-events:none; transition:opacity .2s; }
+    .backdrop.visible { opacity:1; pointer-events:all; }
+
+    /* DOC CARD */
+    .doc-card { background:var(--newsprint); color:#080808; border:3px solid var(--red);
+      box-shadow:0 0 60px rgba(204,0,0,.5),0 24px 60px rgba(0,0,0,.7); }
+    .card-bar { background:var(--red); color:var(--white); font-family:var(--fs);
+      font-size:.72rem; letter-spacing:.3em; padding:.45rem 1rem;
+      display:flex; justify-content:space-between; align-items:center; }
+    .close-btn { background:none; border:none; color:var(--white); font-size:1.1rem;
+      cursor:pointer; line-height:1; opacity:.8; }
+    .close-btn:hover { opacity:1; }
+    .card-body { padding:1.4rem 1.4rem 1.8rem; }
+    .eyebrow { font-size:.48rem; letter-spacing:.3em; text-transform:uppercase;
+      color:var(--red); margin-bottom:.55rem; }
+    .headline { font-family:var(--fh); font-size:clamp(1.3rem,4vw,2.1rem);
+      line-height:1; letter-spacing:.02em; color:#080808;
+      text-transform:uppercase; margin-bottom:.9rem; min-height:2.2rem; }
+    .meta { font-size:.5rem; letter-spacing:.15em; text-transform:uppercase;
+      color:rgba(8,8,8,.45); border-top:1px solid rgba(8,8,8,.12);
+      padding-top:.65rem; margin-bottom:1rem; display:flex; gap:1.5rem; flex-wrap:wrap; }
+    .preview { font-family:'Courier New',monospace; font-size:.75rem;
+      line-height:1.7; color:rgba(8,8,8,.72); margin-bottom:1.4rem; }
+    .redact { background:#000; color:#000; user-select:none;
+      animation:redactPulse 2.8s infinite; border-radius:1px; }
+    @keyframes redactPulse { 0%,100%{opacity:1} 50%{opacity:.6} }
+    .cta { display:inline-block; font-size:.58rem; letter-spacing:.25em;
+      text-transform:uppercase; color:var(--white); background:var(--red);
+      padding:.65rem 1.5rem; text-decoration:none; transition:background .18s; }
+    .cta:hover { background:var(--red-hot); }
+
+    /* VIDEO CARD */
+    .vid-card { background:#0d0d0d; border:3px solid var(--red);
+      box-shadow:0 0 60px rgba(204,0,0,.5),0 24px 60px rgba(0,0,0,.8); }
+    .vid-thumb { position:relative; aspect-ratio:16/9; background:#000; overflow:hidden; }
+    .vid-thumb iframe { width:100%; height:100%; border:none; display:block; }
+    .vid-thumb::after { content:''; position:absolute; inset:0; pointer-events:none;
+      background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.07) 2px,rgba(0,0,0,.07) 4px); }
+    .vid-body { padding:1.2rem 1.4rem 1.7rem; }
+    .vid-title { font-family:var(--fh); font-size:clamp(1.2rem,3.5vw,1.9rem);
+      line-height:1.05; color:var(--white); text-transform:uppercase; margin-bottom:.7rem; }
+    .vid-meta { font-size:.48rem; letter-spacing:.2em; text-transform:uppercase;
+      color:rgba(245,233,200,.3); display:flex; gap:1.5rem; margin-bottom:.9rem; flex-wrap:wrap; }
+    .vid-desc { font-size:.68rem; line-height:1.65; color:rgba(245,233,200,.48); margin-bottom:1.2rem; }
+
+    /* ─── MOBILE ─── */
+    @media (max-width: 600px) {
+      .page { padding:1.4rem .75rem 3rem; }
+      h1 { font-size:clamp(2.8rem,15vw,4.5rem); }
+      .subtitle { font-size:.48rem; letter-spacing:.2em; }
+
+      /* character scales to fit screen */
+      .char-stage { width:min(200px,72vw); height:auto; margin:1.2rem 0 0;
+        filter:drop-shadow(0 6px 18px rgba(0,0,0,.8)); }
+      .char-stage svg { width:100%; height:auto; display:block; }
+      .click-hint { font-size:.43rem; bottom:-22px; }
+
+      /* button */
+      .open-btn { font-size:1.1rem; letter-spacing:.12em; padding:.8rem 1.8rem; margin-top:2rem; }
+      .source { font-size:.42rem; }
+      .counter { font-size:.4rem; }
+
+      /* card portal sizing + scroll on tall content */
+      .card-portal { width:min(480px,96vw); }
+      .card-portal.landed { max-height:88vh; overflow-y:auto; border-radius:0; }
+
+      /* doc card */
+      .card-bar { font-size:.62rem; padding:.4rem .85rem; }
+      .card-body { padding:1rem 1rem 1.4rem; }
+      .eyebrow { font-size:.42rem; }
+      .headline { font-size:clamp(1.1rem,5.5vw,1.8rem); margin-bottom:.7rem; min-height:auto; }
+      .meta { gap:.6rem; font-size:.44rem; }
+      .preview { font-size:.68rem; line-height:1.6; margin-bottom:1.1rem; }
+      .cta { font-size:.52rem; padding:.6rem 1.2rem; }
+
+      /* vid card */
+      .vid-body { padding:.9rem 1rem 1.3rem; }
+      .vid-title { font-size:clamp(1rem,5vw,1.6rem); }
+      .vid-meta { font-size:.42rem; gap:.6rem; }
+      .vid-desc { font-size:.62rem; margin-bottom:1rem; }
+    }
+
+    @media (max-width: 380px) {
+      .char-stage { width:min(170px,80vw); }
+      h1 { font-size:clamp(2.4rem,16vw,3.5rem); }
+      .card-portal { width:98vw; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="page">
+  <div style="text-align:center; margin-bottom:.2rem;">
+    <div class="stamp">DECLASSIFIED · SDNY · 2025 HOUSE OVERSIGHT RELEASE</div>
+    <h1>THE<br/><em>FILES</em></h1>
+    <div class="subtitle">Epstein Court Document Archive Generator</div>
+  </div>
+
+  <!-- SOUTH PARK SADDAM-STYLE CHARACTER -->
+  <div class="char-stage" id="charStage" onclick="openFiles()">
+    <div class="mouth-glow"></div>
+
+    <svg id="charSvg" viewBox="0 0 260 380" style="width:100%;height:auto;display:block;" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <filter id="ds">
+          <feDropShadow dx="2" dy="4" stdDeviation="4" flood-color="#000" flood-opacity=".55"/>
+        </filter>
+      </defs>
+
+      <!-- BODY — army jacket, medals, South Park paper-doll flat style -->
+      <g filter="url(#ds)">
+        <rect x="55" y="262" width="150" height="116" rx="14" fill="#3a4a28" stroke="#111" stroke-width="3"/>
+        <!-- lapels -->
+        <polygon points="130,268 98,300 114,308 130,284" fill="#4a5c32" stroke="#111" stroke-width="2"/>
+        <polygon points="130,268 162,300 146,308 130,284" fill="#4a5c32" stroke="#111" stroke-width="2"/>
+        <!-- shirt under lapels -->
+        <polygon points="130,284 112,308 130,316 148,308" fill="#d8d2c0" stroke="#111" stroke-width="1.5"/>
+        <!-- medals -->
+        <circle cx="88"  cy="282" r="5" fill="#C9A227" stroke="#888" stroke-width="1"/>
+        <circle cx="100" cy="278" r="5" fill="#CC0000" stroke="#888" stroke-width="1"/>
+        <circle cx="112" cy="282" r="5" fill="#C9A227" stroke="#888" stroke-width="1"/>
+        <!-- epaulettes -->
+        <rect x="50"  y="262" width="22" height="10" rx="3" fill="#C9A227" stroke="#111" stroke-width="1.5"/>
+        <rect x="188" y="262" width="22" height="10" rx="3" fill="#C9A227" stroke="#111" stroke-width="1.5"/>
+        <!-- arms -->
+        <rect x="18"  y="268" width="42" height="72" rx="10" fill="#3a4a28" stroke="#111" stroke-width="2.5"/>
+        <rect x="200" y="268" width="42" height="72" rx="10" fill="#3a4a28" stroke="#111" stroke-width="2.5"/>
+        <!-- hands -->
+        <ellipse cx="39"  cy="349" rx="18" ry="13" fill="#c4906a" stroke="#111" stroke-width="2"/>
+        <ellipse cx="221" cy="349" rx="18" ry="13" fill="#c4906a" stroke="#111" stroke-width="2"/>
+        <!-- legs -->
+        <rect x="78"  y="370" width="40" height="14" rx="7" fill="#222" stroke="#111" stroke-width="2"/>
+        <rect x="142" y="370" width="40" height="14" rx="7" fill="#222" stroke="#111" stroke-width="2"/>
+      </g>
+
+      <!-- NECK -->
+      <rect x="112" y="248" width="36" height="26" rx="4" fill="#c4906a" stroke="#111" stroke-width="2.5"/>
+
+      <!-- HEAD UPPER (static — above mouth line y≈225) -->
+      <g id="head-top">
+        <!-- head -->
+        <ellipse cx="130" cy="152" rx="74" ry="78" fill="#c4906a" stroke="#111" stroke-width="3.5"/>
+        <!-- MILITARY CAP (Saddam signature) -->
+        <ellipse cx="130" cy="88"  rx="72" ry="24" fill="#3a4a28" stroke="#111" stroke-width="3"/>
+        <rect    x="62"  y="80"  width="136" height="28" rx="4"  fill="#3a4a28" stroke="#111" stroke-width="2.5"/>
+        <!-- cap brim -->
+        <ellipse cx="130" cy="108" rx="80" ry="10" fill="#2e3a1e" stroke="#111" stroke-width="2"/>
+        <!-- cap badge star -->
+        <polygon points="130,86 124,98 118,98 123,106 121,116 130,110 139,116 137,106 142,98 136,98"
+          fill="#C9A227" stroke="#888" stroke-width="1"/>
+        <!-- gold stripe -->
+        <rect x="62" y="100" width="136" height="6" fill="#C9A227" opacity=".7"/>
+        <!-- ears -->
+        <ellipse cx="57"  cy="162" rx="14" ry="18" fill="#c4906a" stroke="#111" stroke-width="2.5"/>
+        <ellipse cx="203" cy="162" rx="14" ry="18" fill="#c4906a" stroke="#111" stroke-width="2.5"/>
+        <ellipse cx="57"  cy="162" rx="7"  ry="10" fill="#b07840"/>
+        <ellipse cx="203" cy="162" rx="7"  ry="10" fill="#b07840"/>
+        <!-- eyebrows — thick, authoritarian -->
+        <path d="M 82 133 Q 104 124 120 132" stroke="#1a1008" stroke-width="5.5" fill="none" stroke-linecap="round"/>
+        <path d="M 140 132 Q 156 124 178 133" stroke="#1a1008" stroke-width="5.5" fill="none" stroke-linecap="round"/>
+        <!-- eye whites -->
+        <ellipse cx="101" cy="148" rx="16" ry="12" fill="#fff" stroke="#111" stroke-width="2"/>
+        <ellipse cx="159" cy="148" rx="16" ry="12" fill="#fff" stroke="#111" stroke-width="2"/>
+        <!-- pupils -->
+        <circle cx="103" cy="149" r="7" fill="#0a0a0a"/>
+        <circle cx="106" cy="146" r="2.5" fill="#fff"/>
+        <circle cx="161" cy="149" r="7" fill="#0a0a0a"/>
+        <circle cx="164" cy="146" r="2.5" fill="#fff"/>
+        <!-- blink lids -->
+        <ellipse cx="101" cy="140" rx="16" ry="12" fill="#c4906a" stroke="#111" stroke-width="2" class="eyelid"/>
+        <ellipse cx="159" cy="140" rx="16" ry="12" fill="#c4906a" stroke="#111" stroke-width="2" class="eyelid"/>
+        <!-- nose — big round honker -->
+        <ellipse cx="130" cy="174" rx="17" ry="19" fill="#b8855a" stroke="#111" stroke-width="2.5"/>
+        <ellipse cx="122" cy="181" rx="6"  ry="5"  fill="#9a6a3a" opacity=".7"/>
+        <ellipse cx="138" cy="181" rx="6"  ry="5"  fill="#9a6a3a" opacity=".7"/>
+        <!-- MUSTACHE — the South Park Saddam signature -->
+        <ellipse cx="130" cy="202" rx="32" ry="12" fill="#111" stroke="#000" stroke-width="1.5"/>
+        <path d="M 104 200 Q 116 196 128 200" stroke="#333" stroke-width="2" fill="none"/>
+        <path d="M 132 200 Q 144 196 156 200" stroke="#333" stroke-width="2" fill="none"/>
+        <!-- philtrum -->
+        <path d="M 120 196 Q 130 190 140 196" stroke="#9a6a3a" stroke-width="1.5" fill="none"/>
+      </g>
+
+      <!-- JAW (animated) -->
+      <g id="jaw">
+        <!-- lower face flesh -->
+        <path d="M 58 230 Q 55 265 65 280 Q 92 298 130 300 Q 168 298 195 280 Q 205 265 202 230"
+          fill="#c4906a" stroke="#111" stroke-width="3.5"/>
+        <path d="M 114 290 Q 130 298 146 290" stroke="#9a6a3a" stroke-width="2" fill="none"/>
+        <!-- upper lip -->
+        <path d="M 100 228 Q 115 222 130 224 Q 145 222 160 228" fill="#8a5030" stroke="#111" stroke-width="2"/>
+        <!-- mouth dark cavity -->
+        <ellipse cx="130" cy="232" rx="30" ry="9" fill="#1a0000"/>
+        <!-- teeth -->
+        <rect x="104" y="224" width="11" height="10" rx="2" fill="#fffee8" stroke="#aaa" stroke-width=".5"/>
+        <rect x="116" y="223" width="12" height="11" rx="2" fill="#fffee8" stroke="#aaa" stroke-width=".5"/>
+        <rect x="129" y="223" width="12" height="11" rx="2" fill="#fffee8" stroke="#aaa" stroke-width=".5"/>
+        <rect x="142" y="223" width="11" height="10" rx="2" fill="#fffee8" stroke="#aaa" stroke-width=".5"/>
+        <!-- lower lip -->
+        <path d="M 100 236 Q 115 244 130 242 Q 145 244 160 236" fill="#7a4028" stroke="#111" stroke-width="2"/>
+        <!-- jowls -->
+        <ellipse cx="72"  cy="252" rx="16" ry="12" fill="#b8855a" opacity=".4"/>
+        <ellipse cx="188" cy="252" rx="16" ry="12" fill="#b8855a" opacity=".4"/>
+      </g>
+    </svg>
+
+    <div class="click-hint">click to open the files</div>
+  </div>
+
+  <button class="open-btn" onclick="openFiles()">OPEN THE FILES</button>
+  <div class="source">SOURCE: <a href="https://jmail.world/" target="_blank" rel="noopener">JMAIL.WORLD</a> · HOUSE OVERSIGHT 2025</div>
+  <div class="counter" id="counter"></div>
+</div>
+
+<div class="backdrop" id="backdrop" onclick="closeCard()"></div>
+<div class="card-portal" id="cardPortal"></div>
+
+<script>
+const FILES = [
+  { type:'doc', cat:'FLIGHT LOGS',
+    head:'LOLITA EXPRESS — FULL PASSENGER MANIFEST',
+    date:'Filed Jan 3, 2024', src:'SDNY Court Exhibit 4',
+    body:'Manifest records show repeated flights between Palm Beach, New York, and [REDACTED] island. Passenger list includes [REDACTED], [REDACTED], and multiple unnamed females aged [REDACTED] listed as "guests."',
+    url:'https://jmail.world/' },
+  { type:'doc', cat:'PRESIDENTS',
+    head:'TRUMP — EPSTEIN: MAR-A-LAGO PARTIES 1992–2002',
+    date:'Filed Jan 9, 2024', src:'SDNY Court Filing',
+    body:'Internal correspondence references repeated social contact at [REDACTED] Florida residence. Subject listed in personal phone directory. Witness: "They were [REDACTED] friends for over [REDACTED] years."',
+    url:'https://jmail.world/' },
+  { type:'doc', cat:'PRESIDENTS',
+    head:'CLINTON ISLAND VISITS — WITNESS AFFIDAVITS',
+    date:'Filed Jan 3, 2024', src:'SDNY Court Exhibit 9',
+    body:'Sworn declaration references [REDACTED] separate visits to Little St. James. Secret Service detail reportedly [REDACTED]. Flight logs corroborate [REDACTED] trips between [REDACTED] and [REDACTED].',
+    url:'https://jmail.world/' },
+  { type:'doc', cat:'INTELLIGENCE',
+    head:'MOSSAD / ISRAEL — MAXWELL HANDLER DOCUMENTS',
+    date:'Filed Jan 3, 2024', src:'SDNY Case 22-cv-10019',
+    body:'Robert Maxwell [REDACTED] intelligence background. Ghislaine described as [REDACTED]. Communications reference Tel Aviv [REDACTED]. Blackmail operation structured to [REDACTED] powerful world leaders.',
+    url:'https://jmail.world/' },
+  { type:'doc', cat:'VICTIMS',
+    head:'JANE DOE 3 — FULL DEPOSITION TRANSCRIPT',
+    date:'Filed Jan 3, 2024', src:'SDNY Court Exhibit 27',
+    body:'Victim first contacted at [REDACTED] Palm Beach mansion age [REDACTED]. Paid $200 for [REDACTED] massage. Introduced to [REDACTED] and multiple powerful [REDACTED] men. Continued for [REDACTED] years.',
+    url:'https://jmail.world/' },
+  { type:'doc', cat:'SCIENTISTS / TECH',
+    head:'HARVARD · MIT FUNDING — THE SCIENCE MONEY TRAIL',
+    date:'Filed Feb 14, 2024', src:'SDNY Court Filing',
+    body:'Wiring records show $[REDACTED] million transfers to MIT Media Lab. Prof. [REDACTED] acknowledged [REDACTED] meetings. Scientific credibility maintained via [REDACTED] donations to [REDACTED] institutions.',
+    url:'https://jmail.world/' },
+  { type:'doc', cat:'ROYALTY',
+    head:'PRINCE ANDREW — VIRGINIA GIUFFRE ENCOUNTER',
+    date:'Filed Jan 3, 2024', src:'SDNY Case 22-cv-10019',
+    body:'Plaintiff alleges sexual contact at [REDACTED] London townhouse. Witness corroborates presence of H.R.H. at Epstein [REDACTED] events. Settlement 2022 for undisclosed [REDACTED] million pounds.',
+    url:'https://jmail.world/' },
+  { type:'doc', cat:'CLONING / TECHNOLOGY',
+    head:'CLONING LAB FUNDING — TRANSHUMANIST AGENDA',
+    date:'Filed Mar 2, 2024', src:'SDNY Financial Exhibit 14',
+    body:'Subject expressed desire to [REDACTED] seed the human race. Funding transferred to [REDACTED] genomics labs. Dr. [REDACTED] confirmed subject sought [REDACTED] using donor [REDACTED] at Little St. James.',
+    url:'https://jmail.world/' },
+  { type:'doc', cat:'UFO / TECHNOLOGY',
+    head:'UFO BRIEFINGS — EPSTEIN PENTAGON ACCESS DOCS',
+    date:'Filed Jan 3, 2024', src:'SDNY Exhibit 44',
+    body:'Subject attended classified [REDACTED] briefings. Records indicate access to AARO preliminary data. Contact with [REDACTED] defense contractors at private [REDACTED] dinners on the island.',
+    url:'https://jmail.world/' },
+  { type:'doc', cat:'SOCIAL ENGINEERING',
+    head:'THE HONEYPOT MANUAL — OPERATION DOCS',
+    date:'Filed Jan 9, 2024', src:'SDNY Court Exhibit 31',
+    body:'Operational structure: [REDACTED] recruiters identify targets. Girls transported to [REDACTED] mansion. Encounters recorded via hidden [REDACTED] cameras. Compromising material stored [REDACTED] for leverage.',
+    url:'https://jmail.world/' },
+  { type:'doc', cat:'MEDICAL',
+    head:'BLOOD TRANSFUSION RECORDS — ANTI-AGING PROTOCOLS',
+    date:'Filed Jan 3, 2024', src:'SDNY Medical Exhibit 7',
+    body:'Records reference experimental plasma infusion [REDACTED] from young donors. Invoices for [REDACTED] procedures. Parabiosis research funded via [REDACTED]. Dr. [REDACTED] administered [REDACTED] treatments.',
+    url:'https://jmail.world/' },
+  { type:'doc', cat:'CONSPIRACIES',
+    head:'"DIDN\'T KILL HIMSELF" — AUTOPSY ANALYSIS',
+    date:'Filed Oct 2023', src:'NYC Medical Examiner Records',
+    body:'Dr. [REDACTED] concluded injuries "more consistent with [REDACTED] homicide." Hyoid bone fracture [REDACTED]. Both guards asleep simultaneously. Cameras [REDACTED]. Cell check protocols [REDACTED] skipped.',
+    url:'https://jmail.world/' },
+  { type:'doc', cat:'CLIENT LIST',
+    head:'FULL CLIENT LIST — 171 NAMES UNSEALED',
+    date:'Filed Jan 8, 2024', src:'SDNY Case 22-cv-10019',
+    body:'Court-ordered release includes [REDACTED] heads of state, entertainment figures, [REDACTED] finance executives, foreign [REDACTED] dignitaries. Cross-references to flight manifests [REDACTED] attached herein.',
+    url:'https://jmail.world/' },
+  { type:'doc', cat:'GOSSIP / FAMOUS',
+    head:'CELEBRITY GUEST LOGS — DINNER PARTY RECORDS',
+    date:'Filed Jan 3, 2024', src:'SDNY Exhibit 62',
+    body:'Calendar entries reference private dinners with [REDACTED] Hollywood directors, [REDACTED] tech billionaires, [REDACTED] fashion icons. Agenda listed "educational." Photos seized by [REDACTED] at arrest.',
+    url:'https://jmail.world/' },
+  // VIDEOS
+  { type:'vid', cat:'ISLAND / EVIDENCE',
+    head:'EPSTEIN ISLAND — AERIAL FOOTAGE',
+    date:'2019 · Unsealed 2025', src:'House Oversight Release',
+    desc:'Aerial survey of Little St. James. Structures include the blue-striped "temple," underground facility entrances, and staff housing.',
+    vid:'dOHMXNY18lE' },
+  { type:'vid', cat:'MAXWELL',
+    head:'GHISLAINE MAXWELL — DEPOSITION EXCERPTS',
+    date:'2016 Deposition · Released 2021', src:'SDNY Court Record',
+    desc:"Maxwell invokes the Fifth Amendment over 400 times across questions regarding the recruitment, grooming, and trafficking of minor victims.",
+    vid:'TiIZuODfJNA' },
+  { type:'vid', cat:'DOCUMENTARY',
+    head:'JEFFREY EPSTEIN: FILTHY RICH',
+    date:'2020 Netflix', src:'Netflix / James Patterson',
+    desc:'Survivor testimony and investigation into the Epstein trafficking network. Multiple victims on record for the first time.',
+    vid:'jXaFSOfCxnQ' }
+]
+
+let opens = 0, busy = false
+
+function getMouth() {
+  const svg = document.getElementById('charSvg')
+  const r = svg.getBoundingClientRect()
+  // Jaw starts at y≈225 in 380px viewBox → ~59%
+  return { x: r.left + r.width * 0.5, y: r.top + r.height * 0.607 }
+}
+
+function openFiles() {
+  if (busy) return
+  busy = true
+  document.getElementById('charStage').classList.add('open')
+  setTimeout(() => {
+    const f = FILES[Math.floor(Math.random() * FILES.length)]
+    spawnCard(f)
+    opens++
+    document.getElementById('counter').textContent =
+      `FILES OPENED: ${opens} — ARCHIVE: ${FILES.length} ENTRIES`
+  }, 380)
+}
+
+function spawnCard(f) {
+  const { x, y } = getMouth()
+  const portal = document.getElementById('cardPortal')
+  const backdrop = document.getElementById('backdrop')
+
+  portal.style.cssText = `--mx:${x}px; --my:${y}px; left:${x}px; top:${y}px;`
+  portal.innerHTML = f.type === 'vid' ? buildVid(f) : buildDoc(f)
+  portal.classList.remove('fly-out','landed')
+  portal.offsetWidth // reflow
+
+  portal.classList.add('fly-out')
+  backdrop.classList.add('visible')
+
+  portal.addEventListener('animationend', () => {
+    portal.classList.add('landed')
+    portal.style.left = '50vw'
+    portal.style.top  = '50vh'
+    if (f.type === 'doc') typeHead(f.head)
+  }, { once: true })
+}
+
+function closeCard() {
+  const portal = document.getElementById('cardPortal')
+  document.getElementById('backdrop').classList.remove('visible')
+  portal.classList.remove('fly-out','landed')
+  portal.innerHTML = ''
+  portal.style.cssText = ''
+  document.getElementById('charStage').classList.remove('open')
+  busy = false
+}
+
+document.addEventListener('click', e => {
+  if (e.target.classList.contains('close-btn')) closeCard()
+})
+
+function buildDoc(f) {
+  const body = f.body.replace(/\[REDACTED\]/g,'<span class="redact">[REDACTED]</span>')
+  return `<div class="doc-card">
+    <div class="card-bar"><span>${f.cat}</span><button class="close-btn">✕</button></div>
+    <div class="card-body">
+      <div class="eyebrow">Declassified Court Document</div>
+      <div class="headline" id="typedHead"></div>
+      <div class="meta"><span>${f.date}</span><span>${f.src}</span></div>
+      <div class="preview">${body}</div>
+      <a class="cta" href="${f.url}" target="_blank" rel="noopener">VIEW ARCHIVE →</a>
+    </div>
+  </div>`
+}
+
+function buildVid(f) {
+  return `<div class="vid-card">
+    <div class="card-bar"><span>VIDEO EVIDENCE · ${f.cat}</span><button class="close-btn">✕</button></div>
+    <div class="vid-thumb">
+      <iframe src="https://www.youtube.com/embed/${f.vid}?rel=0"
+        allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture"
+        allowfullscreen></iframe>
+    </div>
+    <div class="vid-body">
+      <div class="vid-title">${f.head}</div>
+      <div class="vid-meta"><span>${f.date}</span><span>${f.src}</span></div>
+      <div class="vid-desc">${f.desc}</div>
+      <a class="cta" href="https://jmail.world/" target="_blank" rel="noopener">FULL ARCHIVE →</a>
+    </div>
+  </div>`
+}
+
+function typeHead(text) {
+  const el = document.getElementById('typedHead')
+  if (!el) return
+  el.textContent = ''
+  let i = 0
+  const tick = () => {
+    if (!el.isConnected) return
+    if (i < text.length) { el.textContent += text[i++]; setTimeout(tick, 24 + Math.random()*14) }
+  }
+  tick()
+}
+</script>
+</body>
+</html>
